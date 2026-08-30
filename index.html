@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fall A 2026 MBA Calendar</title>
+<style>
+:root {
+  --bg:#f7f8fa; --card:#ffffff; --panel:#eef1f4; --text:#17202a; --muted:#667085; --border:#d9dee5;
+  --accent:#2457d6; --accent-bg:#e8efff; --mkt:#8a5cf6; --str:#1f9d8a; --study:#f2a93b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{max-width:1200px;margin:0 auto;padding:24px}
+h1{margin:0 0 6px;font-size:28px}
+.sub{color:var(--muted);margin-bottom:18px}
+.toolbar,.filters,.legend{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toolbar{justify-content:space-between;margin:12px 0}
+button{border:1px solid var(--border);background:var(--card);padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px}
+button.active{background:var(--accent-bg);border-color:var(--accent)}
+.progress-wrap{height:9px;background:var(--panel);border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.progress{height:100%;background:var(--accent);width:0}
+.note{background:var(--card);border:1px solid var(--border);padding:14px;border-radius:12px;margin:14px 0}
+.calendar-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+.calendar{min-width:850px}
+.weekdays,.grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.weekdays>div{padding:10px;text-align:center;font-size:12px;font-weight:700;background:var(--panel);border-right:1px solid var(--border)}
+.day{min-height:150px;padding:8px;border-right:1px solid var(--border);border-top:1px solid var(--border)}
+.blank{background:#fafafa}
+.daynum{font-size:12px;font-weight:700;margin-bottom:6px}
+.item{display:flex;gap:6px;align-items:flex-start;font-size:11px;line-height:1.25;margin:5px 0}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:3px;flex:0 0 auto}
+.item input{margin-top:1px}
+.done{text-decoration:line-through;opacity:.55}
+.mkt .dot{background:var(--mkt)} .str .dot{background:var(--str)} .study-text{color:#8b5e00}
+.checklist{display:grid;gap:10px;margin-top:12px}
+.checkrow{display:flex;gap:10px;background:var(--card);border:1px solid var(--border);padding:12px;border-radius:10px}
+.checkrow small{display:block;color:var(--muted);margin-top:3px}
+.legend{color:var(--muted);font-size:13px;margin:10px 0 14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.footer{margin:24px 0 8px;color:var(--muted);font-size:12px}
+@media(max-width:700px){.app{padding:14px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Fall A 2026 MBA Calendar</h1>
+  <div class="sub">MKT 402 + STR 401 · assignments, readings, async work, exams, and recommended study pacing</div>
+
+  <div class="toolbar">
+    <div><strong id="progressText">0 of 0 tasks complete</strong></div>
+    <div>
+      <button id="prev">← Previous</button>
+      <strong id="monthLabel" style="display:inline-block;min-width:150px;text-align:center"></strong>
+      <button id="next">Next →</button>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+
+  <div class="filters">
+    <button data-filter="all" class="active">All</button>
+    <button data-filter="MKT">MKT 402</button>
+    <button data-filter="STR">STR 401</button>
+    <button data-filter="graded">Graded / Due</button>
+    <button data-filter="prep">Reading + Prep</button>
+    <button data-filter="study">Study Plan</button>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--mkt)"></i>MKT 402</span>
+    <span><i style="background:var(--str)"></i>STR 401</span>
+    <span>📖 Recommended study pacing</span>
+    <span>🚨 Major assessment</span>
+  </div>
+
+  <div class="note"><strong>Study pacing:</strong> lighter review begins about a week before major assessments, then shifts to practice problems/case application 3–4 days out, with a lighter review the night before. MKT final pacing is adjustable because its date is still TBD.</div>
+
+  <div class="calendar-wrap">
+    <div class="calendar">
+      <div class="weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px">
+    <h2 style="font-size:18px;margin:0">Selected month checklist</h2>
+    <button id="clear">Clear checks this month</button>
+  </div>
+  <div class="checklist" id="checklist"></div>
+
+  <div class="note">
+    <strong>MKT 402 final exam date: TBD by the Simon Registrar.</strong><br><br><strong>Study pacing once the date is posted:</strong>
+    <ul>
+      <li>7 days before: organize frameworks, formulas, cases, and weak topics.</li>
+      <li>5 days before: practice CLV, pricing, breakeven, and interpretation.</li>
+      <li>3 days before: complete a practice final / mixed case analysis.</li>
+      <li>1 day before: light review only; focus on recall and explaining frameworks.</li>
+    </ul>
+  </div>
+
+  <div class="footer">Your checkbox progress is saved locally in this browser on this computer.</div>
+</div>
+
+<script>
+const tasks = [["2026-08-31", "MKT", "prep", "Read course syllabus", "Required before first class"], ["2026-08-31", "MKT", "prep", "Read Marketing Myopia", "Required before first class"], ["2026-08-31", "MKT", "prep", "Read Segmentation and Targeting", "Required before first class"], ["2026-08-31", "MKT", "prep", "Marketing Strategy – an Overview", "Optional reading"], ["2026-08-31", "MKT", "class", "Class: Course Overview, Segmentation & Targeting", "5:40–9:00 PM"], ["2026-09-02", "STR", "class", "Class: Consumer Behavior & Demand", "5:40–9:00 PM · Optional text Ch. 3, 4"], ["2026-09-04", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-09-07", "STR", "graded", "Applied Economics #1", "Due 11:59 PM · 175–200 words + attach article"], ["2026-09-08", "STR", "graded", "Mini Problem Set #1", "Due 11:59 PM"], ["2026-09-09", "STR", "class", "Class: Costs & Profit Maximization", "5:40–9:00 PM · Optional text Ch. 2, 3, 5"], ["2026-09-10", "MKT", "prep", "Consumer Decision-Making Process", "Complete by Sept. 10"], ["2026-09-10", "MKT", "prep", "Multi-Attribute Model Example", "Complete by Sept. 10"], ["2026-09-10", "MKT", "graded", "Calyx case questions", "Due 7:00 PM · Individual"], ["2026-09-11", "MKT", "prep", "Read Calyx case", "Before class"], ["2026-09-11", "MKT", "prep", "Read Positioning, the Essence of Marketing Strategy", "Before class"], ["2026-09-11", "MKT", "class", "Class: Calyx Case, Targeting & Positioning", "5:40–9:00 PM"], ["2026-09-11", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-09-13", "MKT", "prep", "Read Customer Profitability and Lifetime Value", "Recommended completion before next relevant class · After Sept. 11 class"], ["2026-09-13", "MKT", "prep", "Complete CLV asynchronous module", "Complete by Sept. 13"], ["2026-09-13", "MKT", "graded", "Chase case questions", "Due 7:00 PM · Individual"], ["2026-09-14", "MKT", "prep", "Read Chase case", "Before class"], ["2026-09-14", "MKT", "prep", "Read The Right Game", "Before class"], ["2026-09-14", "MKT", "class", "Class: Chase Case, Company & Competitor Analysis", "5:40–9:00 PM"], ["2026-09-14", "STR", "graded", "Applied Economics #2", "Due 11:59 PM"], ["2026-09-14", "MKT", "study", "📖 Quiz prep: organize Modules 1–3", "30–45 min · Segmentation, Targeting, Positioning, Company & Competitor Analysis"], ["2026-09-15", "STR", "graded", "Mini Problem Set #2", "Due 11:59 PM"], ["2026-09-16", "STR", "class", "Class: Market Power", "5:40–9:00 PM"], ["2026-09-16", "STR", "study", "📖 Midterm prep: build master notes", "45–60 min · Consumer Behavior, Costs/Profit Maximization, Market Power"], ["2026-09-17", "MKT", "study", "📖 Quiz prep: concepts + CLV practice", "45–60 min · Practice recall and calculations"], ["2026-09-18", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-09-19", "STR", "study", "📖 Midterm prep: redo problem sets", "60–90 min · Focus on mistakes and short-answer reasoning"], ["2026-09-19", "MKT", "study", "📖 Quiz prep: mixed practice", "45–60 min · Concepts, cases, calculations, interpretation"], ["2026-09-20", "MKT", "study", "📖 Quiz prep: light final review", "30–45 min · No cramming; focus on weak areas"], ["2026-09-21", "MKT", "prep", "Read Marketing Communications", "Before class"], ["2026-09-21", "MKT", "prep", "Read Marketing Malpractice", "Before class"], ["2026-09-21", "MKT", "graded", "🚨 In-class Quiz", "10%"], ["2026-09-21", "MKT", "class", "Class: Branding, New Product Development & Online Advertising", "5:40–9:00 PM"], ["2026-09-21", "STR", "study", "📖 Midterm prep: weak areas + note sheet", "45–60 min · Consolidate formulas/concepts into exam-ready notes"], ["2026-09-22", "STR", "graded", "Mini Problem Set #3", "Due 11:59 PM"], ["2026-09-22", "STR", "study", "📖 Midterm prep: final practice", "60–90 min · Mixed problems + short answers; then stop early"], ["2026-09-23", "STR", "graded", "🚨 MIDTERM EXAM", "6:00–9:00 PM · 30%"], ["2026-09-24", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-09-27", "MKT", "prep", "Read Mountain Man Brewing Co.", "Recommended completion before next relevant class · Emphasis on breakeven analysis"], ["2026-09-27", "MKT", "prep", "Read Marketing Analysis Toolkit: Breakeven Analysis", "Recommended completion before next relevant class · Required"], ["2026-09-27", "MKT", "prep", "Complete Distribution Strategy async", "Due Sept. 27"], ["2026-09-27", "MKT", "prep", "Complete BEQ async", "Due Sept. 27"], ["2026-09-27", "MKT", "graded", "Casper case questions", "Due 7:00 PM"], ["2026-09-28", "MKT", "prep", "Read Casper Case", "Before class"], ["2026-09-28", "MKT", "prep", "Read Pricing with Market Power, Ch. 10", "Before class"], ["2026-09-28", "MKT", "class", "Class: Casper Case & Pricing Strategy I", "5:40–9:00 PM"], ["2026-09-30", "STR", "class", "Class: Competitive Markets", "5:40–9:00 PM"], ["2026-10-02", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-10-04", "MKT", "graded", "RestaurantGrades exercise questions", "Due 7:00 PM · Group"], ["2026-10-05", "MKT", "prep", "Read RestaurantGrades Case", "Before class"], ["2026-10-05", "MKT", "class", "Class: RestaurantGrades Case & Pricing Strategy II", "5:40–9:00 PM"], ["2026-10-05", "STR", "graded", "Applied Economics #3", "Due 11:59 PM"], ["2026-10-06", "STR", "graded", "Mini Problem Set #4", "Due 11:59 PM"], ["2026-10-07", "STR", "class", "Class: Government Interventions", "5:40–9:00 PM"], ["2026-10-07", "STR", "study", "📖 Final prep: begin post-midterm review", "30–45 min · Competitive Markets + Government Interventions"], ["2026-10-09", "MKT", "prep", "Complete Pricing Examples async", "Due Oct. 9"], ["2026-10-09", "MKT", "graded", "Pricing Problem Set", "Due 7:00 PM · Group · 5%"], ["2026-10-09", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-10-11", "MKT", "graded", "Rachio case questions", "Due 7:00 PM"], ["2026-10-12", "MKT", "prep", "Read Rachio case + review course material", "Before class"], ["2026-10-12", "MKT", "class", "Last Class: Rachio Case, Advertising Content & Wrap-Up", "5:40–9:00 PM"], ["2026-10-12", "MKT", "graded", "Participation Extra Credit", "Optional · Due 7:00 PM"], ["2026-10-12", "STR", "graded", "Applied Economics #4", "Due 11:59 PM"], ["2026-10-12", "MKT", "study", "📖 Final prep: build cumulative course map", "45–60 min · Frameworks, formulas, cases; adjust once exam date posts"], ["2026-10-13", "STR", "graded", "Mini Problem Set #5", "Due 11:59 PM"], ["2026-10-14", "STR", "class", "Class: Game Theory & Oligopolistic Competition", "5:40–9:00 PM"], ["2026-10-14", "STR", "study", "📖 Final prep: consolidate all notes", "60 min · Emphasize post-midterm material"], ["2026-10-14", "MKT", "study", "📖 Final prep: formulas + frameworks", "45–60 min · CLV, pricing, breakeven + when to use each framework"], ["2026-10-15", "MKT", "graded", "🚨 Group Advertising Project", "Due 7:00 PM · Written analysis + recorded presentation"], ["2026-10-16", "STR", "graded", "Asynchronous Problems", "Due 11:59 PM"], ["2026-10-16", "MKT", "study", "📖 Final prep: case application", "45–60 min · Practice analyzing a new business situation"], ["2026-10-17", "STR", "study", "📖 Final prep: practice problems", "90 min · Mixed post-midterm problems + selected pre-midterm review"], ["2026-10-18", "MKT", "graded", "Group Project Presentation Reactions", "Due 7:00 PM"], ["2026-10-18", "MKT", "study", "📖 Final prep: practice exam if posted", "60–90 min · Adjust timing once registrar announces exam"], ["2026-10-19", "STR", "study", "📖 Final prep: mixed mock review", "60–90 min · Practice under light time pressure"], ["2026-10-20", "STR", "graded", "Mini Problem Set #6", "Due 11:59 PM"], ["2026-10-20", "STR", "study", "📖 Final prep: light review only", "30–45 min · Notes, common mistakes, key intuition"], ["2026-10-21", "STR", "graded", "🚨 FINAL EXAM", "6:00–9:00 PM · 40% · Cumulative, post-midterm emphasized"]];
+let month = 7; // August
+let filter = 'all';
+const year = 2026;
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const STORAGE_KEY = 'fallA2026MBAcalendarChecks';
+let checked = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+
+function key(t){ return t[0]+'|'+t[1]+'|'+t[3]; }
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify([...checked])); }
+function visible(t){
+  return filter==='all' || t[1]===filter || (filter==='graded'&&t[2]==='graded') || (filter==='prep'&&t[2]==='prep') || (filter==='study'&&t[2]==='study');
+}
+function toggle(t,on){ on ? checked.add(key(t)) : checked.delete(key(t)); save(); render(); }
+function renderProgress(){
+  const actionable=tasks.filter(t=>t[2]!=='class');
+  const done=actionable.filter(t=>checked.has(key(t))).length;
+  document.getElementById('progressText').textContent = done+' of '+actionable.length+' tasks complete';
+  document.getElementById('progress').style.width = (actionable.length ? (done/actionable.length*100) : 0) + '%';
+}
+function renderCalendar(){
+  document.getElementById('monthLabel').textContent=monthNames[month]+' '+year;
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  const first=new Date(Date.UTC(year,month,1)).getUTCDay();
+  const days=new Date(Date.UTC(year,month+1,0)).getUTCDate();
+  for(let i=0;i<first;i++){ const b=document.createElement('div'); b.className='day blank'; grid.appendChild(b); }
+  for(let d=1;d<=days;d++){
+    const ds=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const cell=document.createElement('div'); cell.className='day';
+    const n=document.createElement('div'); n.className='daynum'; n.textContent=d; cell.appendChild(n);
+    tasks.filter(t=>t[0]===ds && visible(t)).forEach(t=>{
+      const row=document.createElement('label');
+      row.className='item '+(t[1]==='MKT'?'mkt':'str');
+      if(t[2]==='class'){
+        const dot=document.createElement('span'); dot.className='dot'; row.appendChild(dot);
+      } else {
+        const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=checked.has(key(t));
+        cb.addEventListener('change',()=>toggle(t,cb.checked)); row.appendChild(cb);
+      }
+      const span=document.createElement('span');
+      if(checked.has(key(t))) span.classList.add('done');
+      if(t[2]==='study') span.classList.add('study-text');
+      span.textContent=t[1]+': '+t[3];
+      row.appendChild(span); cell.appendChild(row);
+    });
+    grid.appendChild(cell);
+  }
+}
+function renderChecklist(){
+  const wrap=document.getElementById('checklist'); wrap.innerHTML='';
+  const list=tasks.filter(t=>Number(t[0].slice(5,7))===month+1 && visible(t) && t[2]!=='class');
+  if(!list.length){ wrap.innerHTML='<div class="sub">No matching tasks this month.</div>'; return; }
+  list.forEach(t=>{
+    const lab=document.createElement('label'); lab.className='checkrow';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=checked.has(key(t)); cb.addEventListener('change',()=>toggle(t,cb.checked));
+    const body=document.createElement('div');
+    const top=document.createElement('div'); top.style.fontWeight='600';
+    if(cb.checked) top.classList.add('done');
+    const dt=new Date(t[0]+'T00:00:00Z');
+    top.textContent=dt.toLocaleDateString('en-US',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric'})+' · '+t[1]+' · '+t[3];
+    const small=document.createElement('small'); small.textContent=t[4]+(t[2]==='study'?' · Recommended pacing':'');
+    body.append(top,small); lab.append(cb,body); wrap.appendChild(lab);
+  });
+}
+function render(){ renderCalendar(); renderChecklist(); renderProgress(); }
+
+document.getElementById('prev').addEventListener('click',()=>{ if(month>7){month--;render();} });
+document.getElementById('next').addEventListener('click',()=>{ if(month<9){month++;render();} });
+document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+  filter=btn.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); render();
+}));
+document.getElementById('clear').addEventListener('click',()=>{
+  tasks.filter(t=>Number(t[0].slice(5,7))===month+1).forEach(t=>checked.delete(key(t)));
+  save(); render();
+});
+render();
+</script>
+</body>
+</html>
